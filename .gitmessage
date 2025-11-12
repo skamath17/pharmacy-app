@@ -1,0 +1,21 @@
+# Commit Message Template
+# Use this template for better AI code tracking
+
+# Type: [AI] for AI-generated code, [Manual] for manual code, [Fix] for bug fixes
+# Format: [Type] Brief description
+
+# Examples:
+# [AI] Add medicine catalog service with search and filter functionality
+# [Cursor] Implement shopping cart with Zustand state management
+# [Manual] Fix prescription file viewing issue
+# [Fix] Resolve cart badge update reactivity problem
+
+# If AI-assisted, mention the tool:
+# [AI-Cursor] Add order management service
+# [AI-Copilot] Refactor authentication service
+
+# Detailed description (optional):
+# - What was changed
+# - Why it was changed
+# - Any breaking changes
+
