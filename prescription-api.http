@@ -1,0 +1,100 @@
+### Prescription Service API Tests
+### REST Client extension by Huachao Mao
+### Port: 8083
+### Note: Requires X-User-Id header from auth service login
+
+### Variables
+@baseUrl = http://localhost
+@prescriptionService = {{baseUrl}}:8083/api
+@userId = 81ea4f24-4479-461f-b90d-ef01a3b6e2d8
+@prescriptionId = <paste-prescription-id-from-upload-response>
+@filename = <paste-filename-from-prescription-response>
+
+### ============================================
+### PRESCRIPTION UPLOAD
+### ============================================
+
+### Upload prescription (PDF)
+POST {{prescriptionService}}/prescriptions/upload
+X-User-Id: {{userId}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="prescription.pdf"
+Content-Type: application/pdf
+
+< ./sample-data/sample_prescription_us.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Upload prescription (alternative format)
+### Note: Adjust file path and Content-Type based on your file
+POST {{prescriptionService}}/prescriptions/upload
+X-User-Id: {{userId}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="prescription.jpg"
+Content-Type: image/jpeg
+
+< ./path/to/prescription.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### ============================================
+### PRESCRIPTION RETRIEVAL
+### ============================================
+
+### Get my prescriptions (list all)
+GET {{prescriptionService}}/prescriptions
+X-User-Id: {{userId}}
+
+### Get prescription by ID
+GET {{prescriptionService}}/prescriptions/{{prescriptionId}}
+X-User-Id: {{userId}}
+
+### ============================================
+### PRESCRIPTION FILE ACCESS
+### ============================================
+
+### Stream prescription file (POST method)
+POST {{prescriptionService}}/prescriptions/file
+Content-Type: application/json
+
+{
+  "url": "prescriptions/files/{{filename}}"
+}
+
+### Get prescription file directly (GET method)
+GET {{prescriptionService}}/prescriptions/files/{{filename}}
+
+### ============================================
+### PRESCRIPTION DELETION
+### ============================================
+
+### Delete prescription
+DELETE {{prescriptionService}}/prescriptions/{{prescriptionId}}
+X-User-Id: {{userId}}
+
+### ============================================
+### TESTING SCENARIOS
+### ============================================
+
+### Test: Upload without X-User-Id header (should fail)
+POST {{prescriptionService}}/prescriptions/upload
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="test.pdf"
+Content-Type: application/pdf
+
+< ./sample-data/sample_prescription_us.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Test: Get prescriptions with invalid userId (should fail)
+GET {{prescriptionService}}/prescriptions
+X-User-Id: 00000000-0000-0000-0000-000000000000
+
+### Test: Get non-existent prescription (should fail)
+GET {{prescriptionService}}/prescriptions/00000000-0000-0000-0000-000000000000
+X-User-Id: {{userId}}
+
+

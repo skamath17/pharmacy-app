@@ -1,0 +1,231 @@
+### Pharmacy App API Tests - Master File
+### REST Client extension by Huachao Mao
+### 
+### This file contains the complete user flow examples.
+### For detailed service-specific tests, see individual files:
+### - auth-api.http (Port 8081)
+### - patient-api.http (Port 8082)
+### - prescription-api.http (Port 8083)
+### - catalog-api.http (Port 8084)
+### - cart-api.http (Port 8085)
+### - order-api.http (Port 8086)
+
+### Variables
+@baseUrl = http://localhost
+@authService = {{baseUrl}}:8081/api
+@patientService = {{baseUrl}}:8082/api
+@prescriptionService = {{baseUrl}}:8083/api
+@catalogService = {{baseUrl}}:8084/api
+@cartService = {{baseUrl}}:8085/api
+@orderService = {{baseUrl}}:8086/api
+
+### ============================================
+### COMPLETE USER JOURNEY - NEW PATIENT FLOW
+### ============================================
+### Follow these steps in order to test the complete flow:
+
+### Step 1: Register a new user
+# @name register
+POST {{authService}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "newpatient@example.com",
+  "password": "password123",
+  "phone": "+919876543210",
+  "firstName": "New",
+  "lastName": "Patient",
+  "role": "PATIENT"
+}
+
+### Step 2: Login (copy userId from response)
+# @name login
+POST {{authService}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "newpatient@example.com",
+  "password": "password123"
+}
+
+### Step 3: Create patient profile
+### Replace <userId> with actual UUID from Step 2 response
+POST {{patientService}}/patients
+Content-Type: application/json
+X-User-Id: <userId>
+
+{
+  "firstName": "New",
+  "lastName": "Patient",
+  "dateOfBirth": "1990-01-15",
+  "gender": "MALE",
+  "addressLine1": "123 Test Street",
+  "city": "Mumbai",
+  "state": "Maharashtra",
+  "postalCode": "400001",
+  "country": "India",
+  "emergencyContactName": "Emergency Contact",
+  "emergencyContactPhone": "+919876543211",
+  "allergies": ["Penicillin"],
+  "medicalConditions": ["Hypertension"]
+}
+
+### Step 4: Browse medicines
+GET {{catalogService}}/catalog/medicines
+
+### Step 5: Search for specific medicine
+GET {{catalogService}}/catalog/medicines/search?q=paracetamol
+
+### Step 6: Get medicine details
+### Replace <medicineId> with actual ID from Step 4 or 5
+GET {{catalogService}}/catalog/medicines/<medicineId>
+
+### Step 7: Add medicine to cart
+### Replace <userId> and <medicineId> with actual values
+POST {{cartService}}/cart/items
+Content-Type: application/json
+X-User-Id: <userId>
+
+{
+  "medicineId": "<medicineId>",
+  "quantity": 2
+}
+
+### Step 8: View cart
+GET {{cartService}}/cart
+X-User-Id: <userId>
+
+### Step 9: Update cart item quantity
+### Replace <cartItemId> with actual ID from Step 8
+PUT {{cartService}}/cart/items/<cartItemId>
+Content-Type: application/json
+X-User-Id: <userId>
+
+{
+  "quantity": 3
+}
+
+### Step 10: Create order from cart
+POST {{orderService}}/orders
+Content-Type: application/json
+X-User-Id: <userId>
+
+{
+  "shippingAddress": "{\"addressLine1\":\"123 Test Street\",\"city\":\"Mumbai\",\"state\":\"Maharashtra\",\"postalCode\":\"400001\",\"country\":\"India\"}"
+}
+
+### Step 11: View order history
+GET {{orderService}}/orders
+X-User-Id: <userId>
+
+### Step 12: Get order details
+### Replace <orderId> with actual ID from Step 10
+GET {{orderService}}/orders/<orderId>
+X-User-Id: <userId>
+
+### ============================================
+### PRESCRIPTION UPLOAD FLOW
+### ============================================
+
+### Step 1: Login (use existing user or register new one)
+POST {{authService}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "newpatient@example.com",
+  "password": "password123"
+}
+
+### Step 2: Upload prescription
+### Replace <userId> with actual UUID from Step 1
+POST {{prescriptionService}}/prescriptions/upload
+X-User-Id: <userId>
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="prescription.pdf"
+Content-Type: application/pdf
+
+< ./sample-data/sample_prescription_us.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Step 3: View all prescriptions
+GET {{prescriptionService}}/prescriptions
+X-User-Id: <userId>
+
+### Step 4: Get prescription details
+### Replace <prescriptionId> with actual ID from Step 2
+GET {{prescriptionService}}/prescriptions/<prescriptionId>
+X-User-Id: <userId>
+
+### Step 5: View prescription file
+### Replace <filename> with actual filename from Step 2
+GET {{prescriptionService}}/prescriptions/files/<filename>
+
+### ============================================
+### QUICK TEST SCENARIOS
+### ============================================
+
+### Quick Test 1: Register and Login
+POST {{authService}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "quicktest@example.com",
+  "password": "password123",
+  "phone": "+919876543210",
+  "firstName": "Quick",
+  "lastName": "Test",
+  "role": "PATIENT"
+}
+
+###
+POST {{authService}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "quicktest@example.com",
+  "password": "password123"
+}
+
+### Quick Test 2: Browse Catalog
+GET {{catalogService}}/catalog/medicines
+
+###
+GET {{catalogService}}/catalog/medicines/search?q=aspirin
+
+###
+GET {{catalogService}}/catalog/medicines?form=TABLET&prescriptionRequired=false
+
+### Quick Test 3: Cart Operations (requires userId)
+### Replace <userId> and <medicineId> with actual values
+GET {{cartService}}/cart
+X-User-Id: <userId>
+
+###
+POST {{cartService}}/cart/items
+Content-Type: application/json
+X-User-Id: <userId>
+
+{
+  "medicineId": "<medicineId>",
+  "quantity": 1
+}
+
+###
+GET {{cartService}}/cart
+X-User-Id: <userId>
+
+### ============================================
+### NOTES
+### ============================================
+### 1. Replace placeholder values (<userId>, <medicineId>, etc.) with actual values from responses
+### 2. For detailed service-specific tests, use individual service files:
+###    - auth-api.http
+###    - patient-api.http
+###    - prescription-api.http
+###    - catalog-api.http
+###    - cart-api.http
+###    - order-api.http
+### 3. Ensure all backend services are running before testing
+### 4. Check REST_CLIENT_GUIDE.md for detailed usage instructions

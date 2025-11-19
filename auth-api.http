@@ -1,0 +1,92 @@
+### Auth Service API Tests
+### REST Client extension by Huachao Mao
+### Port: 8081
+
+### Variables
+@baseUrl = http://localhost
+@authService = {{baseUrl}}:8081/api
+
+### ============================================
+### USER REGISTRATION
+### ============================================
+
+### Register a new patient
+POST {{authService}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "patient@example.com",
+  "password": "password123",
+  "phone": "+919876543212",
+  "firstName": "John",
+  "lastName": "Doe",
+  "role": "PATIENT"
+}
+
+### Register a pharmacist
+POST {{authService}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "pharmacist@example.com",
+  "password": "password123",
+  "phone": "+919876543211",
+  "firstName": "Jane",
+  "lastName": "Smith",
+  "role": "PHARMACIST"
+}
+
+### Register with minimal required fields
+POST {{authService}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "minimal@example.com",
+  "password": "password123",
+  "firstName": "Minimal",
+  "lastName": "User",
+  "role": "PATIENT"
+}
+
+### ============================================
+### USER LOGIN
+### ============================================
+
+### Login as patient
+# @name loginPatient
+POST {{authService}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "patient@example.com",
+  "password": "password123"
+}
+
+### Login as pharmacist
+# @name loginPharmacist
+POST {{authService}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "pharmacist@example.com",
+  "password": "password123"
+}
+
+### Login with invalid credentials (should fail)
+POST {{authService}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "wrong@example.com",
+  "password": "wrongpassword"
+}
+
+### ============================================
+### NOTES
+### ============================================
+### After successful login:
+### 1. Copy the userId from the response (response.data.user.id)
+### 2. Use this userId in X-User-Id header for other services
+### 3. The token field contains the JWT token (if needed for future auth)
+
+

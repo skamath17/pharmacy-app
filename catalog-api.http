@@ -1,0 +1,89 @@
+### Catalog Service API Tests
+### REST Client extension by Huachao Mao
+### Port: 8084
+### Note: No authentication required for catalog browsing
+
+### Variables
+@baseUrl = http://localhost
+@catalogService = {{baseUrl}}:8084/api
+@medicineId = <paste-medicine-id-from-response>
+
+### ============================================
+### BROWSE MEDICINES
+### ============================================
+
+### Get all medicines
+GET {{catalogService}}/catalog/medicines
+
+### Get all medicines (with pagination if supported)
+GET {{catalogService}}/catalog/medicines?page=0&size=20
+
+### ============================================
+### SEARCH MEDICINES
+### ============================================
+
+### Search medicines by query string
+GET {{catalogService}}/catalog/medicines/search?q=paracetamol
+
+### Search medicines by name
+GET {{catalogService}}/catalog/medicines/search?q=aspirin
+
+### Search medicines by generic name
+GET {{catalogService}}/catalog/medicines/search?q=acetaminophen
+
+### ============================================
+### FILTER MEDICINES
+### ============================================
+
+### Filter by form (TABLET, CAPSULE, SYRUP, etc.)
+GET {{catalogService}}/catalog/medicines?form=TABLET
+
+### Filter by schedule (H, H1, X, etc.)
+GET {{catalogService}}/catalog/medicines?schedule=H
+
+### Filter by prescription requirement
+GET {{catalogService}}/catalog/medicines?prescriptionRequired=true
+
+### Filter by prescription requirement (false)
+GET {{catalogService}}/catalog/medicines?prescriptionRequired=false
+
+### ============================================
+### COMBINED SEARCH AND FILTER
+### ============================================
+
+### Search with form filter
+GET {{catalogService}}/catalog/medicines?search=paracetamol&form=TABLET
+
+### Search with schedule filter
+GET {{catalogService}}/catalog/medicines?search=paracetamol&schedule=H
+
+### Search with prescription requirement filter
+GET {{catalogService}}/catalog/medicines?search=paracetamol&prescriptionRequired=true
+
+### Combined: search + form + schedule + prescriptionRequired
+GET {{catalogService}}/catalog/medicines?search=paracetamol&form=TABLET&schedule=H&prescriptionRequired=true
+
+### ============================================
+### GET MEDICINE DETAILS
+### ============================================
+
+### Get medicine by ID
+GET {{catalogService}}/catalog/medicines/{{medicineId}}
+
+### ============================================
+### TESTING SCENARIOS
+### ============================================
+
+### Test: Get non-existent medicine (should fail)
+GET {{catalogService}}/catalog/medicines/00000000-0000-0000-0000-000000000000
+
+### Test: Search with empty query
+GET {{catalogService}}/catalog/medicines/search?q=
+
+### Test: Filter with invalid form value (should handle gracefully)
+GET {{catalogService}}/catalog/medicines?form=INVALID_FORM
+
+### Test: Filter with invalid schedule value (should handle gracefully)
+GET {{catalogService}}/catalog/medicines?schedule=INVALID_SCHEDULE
+
+

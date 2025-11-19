@@ -1,0 +1,129 @@
+### Order Service API Tests
+### REST Client extension by Huachao Mao
+### Port: 8086
+### Note: Requires X-User-Id header from auth service login
+
+### Variables
+@baseUrl = http://localhost
+@orderService = {{baseUrl}}:8086/api
+@userId = 81ea4f24-4479-461f-b90d-ef01a3b6e2d8
+@orderId = <paste-order-id-from-create-order-response>
+
+### ============================================
+### CREATE ORDER
+### ============================================
+
+### Create order from cart
+POST {{orderService}}/orders
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "shippingAddress": "{\"addressLine1\":\"123 Main Street\",\"addressLine2\":\"Apt 4B\",\"city\":\"Mumbai\",\"state\":\"Maharashtra\",\"postalCode\":\"400001\",\"country\":\"India\"}"
+}
+
+### Create order with minimal address
+POST {{orderService}}/orders
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "shippingAddress": "{\"addressLine1\":\"456 Oak Avenue\",\"city\":\"Delhi\",\"state\":\"Delhi\",\"postalCode\":\"110001\",\"country\":\"India\"}"
+}
+
+### Create order with complete address details
+POST {{orderService}}/orders
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "shippingAddress": "{\"addressLine1\":\"789 Complete Street\",\"addressLine2\":\"Building A, Floor 3\",\"city\":\"Bangalore\",\"state\":\"Karnataka\",\"postalCode\":\"560001\",\"country\":\"India\",\"landmark\":\"Near City Mall\",\"contactName\":\"John Doe\",\"contactPhone\":\"+919876543210\"}"
+}
+
+### ============================================
+### RETRIEVE ORDERS
+### ============================================
+
+### Get my orders (order history)
+GET {{orderService}}/orders
+X-User-Id: {{userId}}
+
+### Get order by ID
+GET {{orderService}}/orders/{{orderId}}
+X-User-Id: {{userId}}
+
+### ============================================
+### COMPLETE ORDER WORKFLOW
+### ============================================
+
+### Step 1: View order history (should be empty initially)
+GET {{orderService}}/orders
+X-User-Id: {{userId}}
+
+### Step 2: Create order from cart
+### Note: Ensure cart has items before creating order
+POST {{orderService}}/orders
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "shippingAddress": "{\"addressLine1\":\"123 Test Street\",\"city\":\"Mumbai\",\"state\":\"Maharashtra\",\"postalCode\":\"400001\",\"country\":\"India\"}"
+}
+
+### Step 3: View order history (should show new order)
+GET {{orderService}}/orders
+X-User-Id: {{userId}}
+
+### Step 4: Get order details
+GET {{orderService}}/orders/{{orderId}}
+X-User-Id: {{userId}}
+
+### ============================================
+### TESTING SCENARIOS
+### ============================================
+
+### Test: Create order without X-User-Id header (should fail)
+POST {{orderService}}/orders
+Content-Type: application/json
+
+{
+  "shippingAddress": "{\"addressLine1\":\"123 Test Street\",\"city\":\"Mumbai\",\"state\":\"Maharashtra\",\"postalCode\":\"400001\",\"country\":\"India\"}"
+}
+
+### Test: Create order with empty cart (should fail)
+POST {{orderService}}/orders
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "shippingAddress": "{\"addressLine1\":\"123 Test Street\",\"city\":\"Mumbai\",\"state\":\"Maharashtra\",\"postalCode\":\"400001\",\"country\":\"India\"}"
+}
+
+### Test: Create order with invalid JSON in shippingAddress (should fail)
+POST {{orderService}}/orders
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "shippingAddress": "invalid json"
+}
+
+### Test: Get non-existent order (should fail)
+GET {{orderService}}/orders/00000000-0000-0000-0000-000000000000
+X-User-Id: {{userId}}
+
+### Test: Get order with invalid userId (should fail)
+GET {{orderService}}/orders/{{orderId}}
+X-User-Id: 00000000-0000-0000-0000-000000000000
+
+### ============================================
+### NOTES
+### ============================================
+### Order Creation Flow:
+### 1. User must have items in cart (use cart-api.http to add items)
+### 2. Create order from cart (this will clear the cart)
+### 3. Order status will be set to appropriate initial status
+### 4. Order number will be auto-generated
+### 5. Order items will be created from cart items
+
+

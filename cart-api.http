@@ -1,0 +1,191 @@
+### Cart Service API Tests
+### REST Client extension by Huachao Mao
+### Port: 8085
+### Note: Requires X-User-Id header from auth service login
+
+### Variables
+@baseUrl = http://localhost
+@cartService = {{baseUrl}}:8085/api
+@userId = 81ea4f24-4479-461f-b90d-ef01a3b6e2d8
+@medicineId = <paste-medicine-id-from-catalog-service>
+@cartItemId = <paste-cart-item-id-from-cart-response>
+
+### ============================================
+### CART RETRIEVAL
+### ============================================
+
+### Get my cart
+GET {{cartService}}/cart
+X-User-Id: {{userId}}
+
+### ============================================
+### ADD ITEMS TO CART
+### ============================================
+
+### Add item to cart
+POST {{cartService}}/cart/items
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "medicineId": "{{medicineId}}",
+  "quantity": 2
+}
+
+### Add single item to cart
+POST {{cartService}}/cart/items
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "medicineId": "{{medicineId}}",
+  "quantity": 1
+}
+
+### Add multiple items (call multiple times with different medicineIds)
+POST {{cartService}}/cart/items
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "medicineId": "{{medicineId}}",
+  "quantity": 5
+}
+
+### ============================================
+### UPDATE CART ITEMS
+### ============================================
+
+### Update cart item quantity
+PUT {{cartService}}/cart/items/{{cartItemId}}
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "quantity": 5
+}
+
+### Update cart item quantity to 1
+PUT {{cartService}}/cart/items/{{cartItemId}}
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "quantity": 1
+}
+
+### Update cart item quantity to 10
+PUT {{cartService}}/cart/items/{{cartItemId}}
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "quantity": 10
+}
+
+### ============================================
+### REMOVE ITEMS FROM CART
+### ============================================
+
+### Remove item from cart
+DELETE {{cartService}}/cart/items/{{cartItemId}}
+X-User-Id: {{userId}}
+
+### ============================================
+### CLEAR CART
+### ============================================
+
+### Clear entire cart
+DELETE {{cartService}}/cart
+X-User-Id: {{userId}}
+
+### ============================================
+### COMPLETE CART WORKFLOW
+### ============================================
+
+### Step 1: Get empty cart (should create one if doesn't exist)
+GET {{cartService}}/cart
+X-User-Id: {{userId}}
+
+### Step 2: Add first item
+POST {{cartService}}/cart/items
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "medicineId": "{{medicineId}}",
+  "quantity": 2
+}
+
+### Step 3: View cart with item
+GET {{cartService}}/cart
+X-User-Id: {{userId}}
+
+### Step 4: Update quantity
+PUT {{cartService}}/cart/items/{{cartItemId}}
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "quantity": 3
+}
+
+### Step 5: View updated cart
+GET {{cartService}}/cart
+X-User-Id: {{userId}}
+
+### Step 6: Remove item
+DELETE {{cartService}}/cart/items/{{cartItemId}}
+X-User-Id: {{userId}}
+
+### Step 7: View empty cart
+GET {{cartService}}/cart
+X-User-Id: {{userId}}
+
+### ============================================
+### TESTING SCENARIOS
+### ============================================
+
+### Test: Add item without X-User-Id header (should fail)
+POST {{cartService}}/cart/items
+Content-Type: application/json
+
+{
+  "medicineId": "{{medicineId}}",
+  "quantity": 1
+}
+
+### Test: Add item with invalid medicineId (should fail)
+POST {{cartService}}/cart/items
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "medicineId": "00000000-0000-0000-0000-000000000000",
+  "quantity": 1
+}
+
+### Test: Add item with zero quantity (should fail or handle gracefully)
+POST {{cartService}}/cart/items
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "medicineId": "{{medicineId}}",
+  "quantity": 0
+}
+
+### Test: Update non-existent cart item (should fail)
+PUT {{cartService}}/cart/items/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "quantity": 5
+}
+
+### Test: Remove non-existent cart item (should fail)
+DELETE {{cartService}}/cart/items/00000000-0000-0000-0000-000000000000
+X-User-Id: {{userId}}
+
+
