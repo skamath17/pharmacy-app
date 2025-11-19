@@ -42,22 +42,21 @@ $jobs = @()
 foreach ($service in $services) {
     Write-Host "Starting $($service.Name)..." -ForegroundColor Yellow
     
-    Push-Location $service.Path
+    # Resolve path before changing directory
+    $servicePath = Resolve-Path $service.Path
     
     # Start service in background
     $job = Start-Job -ScriptBlock {
         param($servicePath)
         Set-Location $servicePath
         mvn spring-boot:run 2>&1
-    } -ArgumentList (Resolve-Path $service.Path)
+    } -ArgumentList $servicePath
     
     $jobs += @{
         Name = $service.Name
         Job = $job
         Port = $service.Port
     }
-    
-    Pop-Location
     
     Write-Host "Started $($service.Name) (Port: $($service.Port))" -ForegroundColor Green
     Start-Sleep -Seconds 3
